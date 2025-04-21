@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anime Recommendation Website</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="header">
+    <h1>Anime Recommendation Website</h1>
+    <div class="login-section" id="loginSection"> 
+        <!-- Loding the user info dynamically --> 
+    </div>
+</div>
+<div id="personalRecommendations" class="recommendations-section" style="display: none;">
+    <h2 class="section-title">Recommend for you</h2>
+    <div class="anime-list" id="recommendationsList"></div>
+</div>
+<div class="popular-section">
+    <h2 class="section-title">Hot Anime Ranking</h2>
+    <div class="anime-list" id="popularAnimeList"></div>
+    <div class="pagination" id="pagination"></div>
+</div>
+<script>
+        let currentPage = 1;
+        const perPage = 20;
+        let totalPages = 1;
+
+        // DOM Elements
+        const loginSection = document.getElementById('loginSection');
+        const popularAnimeList = document.getElementById('popularAnimeList');
+        const pagination = document.getElementById('pagination');
+        const recommendationsSection = document.getElementById('personalRecommendations');
+        const recommendationsList = document.getElementById('recommendationsList');
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+            loadPopularAnimes(currentPage);
+        });
+
+        // Check the Login Status
+async function checkLoginStatus() {
+    try {
+        const response = await fetch('/check_login', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.logged_in) {
+                renderUserInfo(data.user_id);
+                loadRecommendations();
+            } else {
+                // Render the Login Form
+                renderLoginForm();
+            }
+        }
+    } catch (error) {
+        console.error('Login Status Error:', error);
+        renderLoginForm();
+    }
+}
+
+// Render the Login Form
+function renderLoginForm() {
+    loginSection.innerHTML = `
+        <div class="login-form">
+            <input type="text" id="userId" placeholder="User ID">
+            <input type="password" id="password" placeholder="Password" value="">
+            <button onclick="login()">Login</button>
+            <button class="register-btn" onclick="register()">Register</button>
+        </div>
+    `;
+    recommendationsSection.style.display = 'none';
+}
+
+        
+        // Update the page indexes
+async function updatePagination() {
+    try {
+        // Fetch the total number of the animes
+        const countResponse = await fetch('/anime_count');
+        const { count } = await countResponse.json();
+        
+        // Compute the total pages
+        totalPages = Math.ceil(count / perPage);
+        if (totalPages < 1) totalPages = 1;
+        
+        // Ensure the current page is in the bound
+        currentPage = Math.max(1, Math.min(currentPage, totalPages));
+        
+        pagination.innerHTML = '';
+        
+        // Build the button container for the page indexes
+        const btnContainer = document.createElement('div');
+        btnContainer.className = 'pagination-buttons';
+        
+        // Generate the page button dynamically
+        let pages = [];
+        // The maximum visible pages
+        const MAX_VISIBLE = 7;
+        
+        if (totalPages <= MAX_VISIBLE) {
+            // Display all the pages when animes are not enough
+            pages = Array.from({length: totalPages}, (_, i) => i + 1);
+        } else {
+            // Compute the range dynamically
+            let start = Math.max(2, currentPage - 2);
+            let end = Math.min(totalPages - 1, currentPage + 2);
+            
+            // Ensure there are enough pages
+            if (currentPage <= MAX_VISIBLE - 3) {
+                start = 2;
+                end = MAX_VISIBLE - 2;
+            } else if (currentPage >= totalPages - (MAX_VISIBLE - 3)) {
+                start = totalPages - (MAX_VISIBLE - 2);
+                end = totalPages - 1;
+            }
+            
+            pages = [
+                1,
+                ...(start > 2 ? ['...'] : []),
+                ...Array.from({length: end - start + 1}, (_, i) => start + i),
+                ...(end < totalPages - 1 ? ['...'] : []),
+                totalPages
+            ];
+        }
+        
+        // Build the buttons
+        pages.forEach(page => {
+            const btn = document.createElement('button');
+            if (page === '...') {
+                btn.textContent = '...';
+                btn.className = 'ellipsis';
+                btn.disabled = true;
+            } else {
+                btn.textContent = page;
+                btn.className = page === currentPage ? 'active' : '';
+                btn.addEventListener('click', () => {
+                    currentPage = page;
+                    loadPopularAnimes(currentPage);
+                });
+            }
+            btnContainer.appendChild(btn);
+        });
+        
+        // The jump button
+        const jumpContainer = document.createElement('div');
+        jumpContainer.className = 'page-jump';
+        jumpContainer.innerHTML = `
+            <input type="number" min="1" max="${totalPages}" 
+                   placeholder="Jump to" class="jump-input">
+            <button class="jump-btn">GO</button>
+        `;
+        
+        jumpContainer.querySelector('.jump-btn').addEventListener('click', () => {
+            const input = jumpContainer.querySelector('.jump-input');
+            const targetPage = parseInt(input.value);
+            if (!isNaN(targetPage) && targetPage >= 1 && targetPage <= totalPages) {
+                currentPage = targetPage;
+                loadPopularAnimes(currentPage);
+            }
+        });
+        
+        // Combine the button container and the jump container
+        pagination.append(
+            btnContainer,
+            jumpContainer
+        );
+        
+        // Set the style
+        const style = document.createElement('style');
+        style.textContent = `
+            .pagination {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 20px;
+            }
+            .pagination-buttons {
+                display: flex;
+                gap: 5px;
+            }
+            .page-jump {
+                display: flex;
+                gap: 5px;
+                align-items: center;
+            }
+            .jump-input {
+                width: 80px;
+                padding: 5px;
+                text-align: center;
+            }
+            .ellipsis {
+                cursor: default;
+                background: none;
+                border: none;
+            }
+        `;
+        pagination.appendChild(style);
+        
+    } catch (error) {
+        console.error('Failed to update the page:', error);
+    }
+}
+        
+
+        // Render the user info
+        function renderUserInfo(userId) {
+            loginSection.innerHTML = `
+                <div class="user-info">
+                    <span>User: ${userId}</span>
+                    <button onclick="logout()">Logout</button>
+                </div>
+            `;
+            recommendationsSection.style.display = 'block';
+        }
+
+        // Login Function
+async function login() {
+    const userId = document.getElementById('userId')?.value;
+    const password = document.getElementById('password')?.value;
+    
+    if (!userId || !password) {
+        alert('Input your user ID and password!');
+        return;
+    }
+
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ 
+                user_id: userId,
+                password: password
+            })
+        });
+        
+        if (response.ok) {
+            await checkLoginStatus();
+            // Refresh the page
+            await loadPopularAnimes(currentPage);
+        } else {
+            alert('Login Error：Invalid Account');
+        }
+    } catch (error) {
+        console.error('Login Error:', error);
+        alert('Login Session Error');
+    }
+}
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                checkLoginStatus();
+                location.reload();
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        // Loading the popular animes 
+        async function loadPopularAnimes(page) {
+    try {
+        console.log(`Loading the ${page}th page...`);
+        const response = await fetch(`/popular?page=${page}`);
+        
+        if (!response.ok) {
+            throw new Error(`Fetch Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("The response data:", data);
+
+        if (!data.animes || data.animes.length === 0) {
+            console.error("Empty data! Check the backend!");
+            popularAnimeList.innerHTML = "<p>Can't find any anime data.</p>";
+            return;
+        }
+
+        console.log("The first data:", data.animes[0]);
+        renderAnimeList(data.animes, popularAnimeList);
+        updatePagination();
+
+    } catch (error) {
+        console.error("Loading Error:", error);
+        popularAnimeList.innerHTML = `<p>Loding Failed: ${error.message}</p>`;
+    }
+}
+
+        // Loading the recommended animes
+        async function loadRecommendations() {
+            try {
+                const response = await fetch('/recommendations', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.recommendations && data.recommendations.length > 0) {
+                        renderAnimeList(data.recommendations, recommendationsList, true);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading recommendations:', error);
+            }
+        }
+
+        // Render the animes list
+        function renderAnimeList(animes, container, showScore = false) {
+        container.innerHTML = animes.map(anime => `
+        <div class="anime-card" onclick="window.location.href='/anime/${anime.anime_id}'" style="cursor:pointer;">
+            ${anime.image_url ? `
+                <img src="${anime.image_url}" alt="${anime.name}" 
+                     style="width:100%; max-height:200px; object-fit:cover;">
+            ` : ''}
+            <div class="anime-title">${anime.name}</div>
+            <div class="genre-tags">
+                ${anime.genre.split(',').map(g => `
+                    <span class="genre-tag">${g.trim()}</span>
+                `).join('')}
+            </div>
+            <div class="anime-meta">
+                <div>Type: ${anime.type}</div>
+                <div>Rating: ${anime.avg_rating ? anime.avg_rating.toFixed(1) : 'N/A'}</div>
+                <div>Rating Members: ${anime.rating_count || anime.members || 'N/A'}</div>
+            </div>
+        </div>
+    `).join('');
+}
+    function register() {
+    window.location.href = '/register';
+}
+
+    </script>
+</body>
+</html>
