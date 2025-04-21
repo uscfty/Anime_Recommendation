@@ -17,6 +17,14 @@ image_cache = {}
 info_cache = {}
 
 
+# Load data files and fix index
+anime_df = pd.read_csv("anime.csv")
+ratings_df = pd.read_csv("ratings.csv")
+users_df = pd.read_csv("users.csv")
+
+anime_df = anime_df.reset_index(drop=True)
+ratings_df = ratings_df.reset_index(drop=True)
+
 # Fetch the image of the given anime
 def get_mal_image(mal_id):
     if mal_id in image_cache:
