@@ -314,7 +314,8 @@ def test_route():
 
 @app.route('/anime/<int:anime_id>')
 def anime_detail(anime_id):
-    anime = anime_df[anime_data_df['anime_id'] == anime_id].to_dict(orient='records')
+    #anime = anime_df[anime_data_df['anime_id'] == anime_id].to_dict(orient='records')
+    anime = anime_df.loc[anime_df["anime_id"] == anime_id].to_dict(orient="records")
     anime[0]["image_url"] = get_mal_image(anime_id)
     info = get_mal_info(anime_id)
     for key in info:
