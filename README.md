@@ -29,12 +29,6 @@ deactivate
 rm -rf .venv
 #Remove all dependencies, interpreter copies, package caches, etc. that you installed
 ```
-# Check if Python 3.11 is installed:
-```bash
-which python3
-#If not installed, use Homebrew to install:
-#brew install python@3.11
-```
 # Create virtual environment
 ```bash
 python3.11 -m venv .venv
