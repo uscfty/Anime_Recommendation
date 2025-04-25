@@ -23,7 +23,21 @@ This project provides a Flask-based REST API for serving an anime recommendation
 git clone <your_repo_url>
 cd Anime_Recommendation_test_cleaner
 ```
-2. **Clone the repository**
+2. **Environment Preparation**
+# Exit any currently activated virtual environment (if applicable):
+```bash
+deactivate
+rm -rf .venv
+#Remove all dependencies, interpreter copies, package caches, etc. that you installed
+```
+# Check if Python 3.11 is installed:
+```bash
+which python3
+#If not installed, use Homebrew to install:
+#brew install python@3.11
+Create a virtual environment in your project folder:
+/opt/homebrew/bin/python3.11 -m venv .venv
+```
 # Create virtual environment
 ```bash
 python3.11 -m venv .venv
