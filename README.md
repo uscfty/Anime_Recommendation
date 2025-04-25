@@ -35,12 +35,10 @@ rm -rf .venv
 which python3
 #If not installed, use Homebrew to install:
 #brew install python@3.11
-Create a virtual environment in your project folder:
-/opt/homebrew/bin/python3.11 -m venv .venv
 ```
 # Create virtual environment
 ```bash
-python3.11 -m venv .venv
+/opt/homebrew/bin/python3.11 -m venv .venv
 # OR if you have a specific python path:
 # /full/path/to/python3.11 -m venv .venv
 ```
