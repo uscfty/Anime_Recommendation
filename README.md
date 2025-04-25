@@ -17,11 +17,10 @@ This project provides a Flask-based REST API for serving an anime recommendation
 
 ## 🔧 Setup Instructions
 
-1. **Clone the repository**
+1. **Open the folder into VSC IDE**
 
 ```bash
-git clone <your_repo_url>
-cd Anime_Recommendation_test_cleaner
+cd Anime_Recommendation_test_cleanest
 ```
 2. **Environment Preparation**
 # Exit any currently activated virtual environment (if applicable):
