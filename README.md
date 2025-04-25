@@ -38,9 +38,7 @@ which python3
 ```
 # Create virtual environment
 ```bash
-/opt/homebrew/bin/python3.11 -m venv .venv
-# OR if you have a specific python path:
-# /full/path/to/python3.11 -m venv .venv
+python3.11 -m venv .venv
 ```
 3. **Activate the environment**
 # macOS/Linux
