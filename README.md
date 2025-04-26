@@ -4,7 +4,7 @@ This project is deployed online and can be accessed directly:
 
 🌐 **Live Demo:** [Click to Open](https://anime-recommendation-futianyu0715.onrender.com)
 
-🎥 **Demo Video:** [Watch here]()
+🎥 **Demo Video:** [Watch here](https://drive.google.com/file/d/1lpRtVpOOGOz9FVP2XefV9ezjAJzDRRlQ/view?usp=drive_link)
 ---
 
 ## Features
