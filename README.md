@@ -1,3 +1,31 @@
+# Anime Recommendation System
+
+This project is deployed online and can be accessed directly:
+
+🌐 **Live Demo:** [Click to Open](https://anime-recommendation-futianyu0715.onrender.com)
+
+🎥 **Demo Video:** [Watch here]()
+---
+
+## Features
+
+- Flask-based REST API
+- Pre-trained scikit-learn model
+- Deployed on Render.com
+
+## Technologies
+
+- Python 3.11
+- Flask 3.1
+- scikit-learn 1.2.2
+- Hosted via Render
+
+---
+
+
+
+
+
 # Anime Recommendation System API
 
 This project provides a Flask-based REST API for serving an anime recommendation model using `scikit-learn`.
